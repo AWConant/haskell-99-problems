@@ -20,11 +20,9 @@ butLast' (_:x:xs) = butLast' (x:xs)
 -- Find the K'th element of a list. The first element in the list is number 1.
 kthElem' :: [a] -> Int -> a
 kthElem' [] _ = error "tried to call kthElem' with empty list" 
-kthElem' list@(x:xs) i
-  | i > len || i < 1 = error "index out of bounds in kthElem'"
-  | otherwise = kthHelper' list i 1 
-    where
-      len = listLen' list
+kthElem' list i
+  | i > length list || i < 1 = error "index out of bounds in kthElem'"
+kthElem' list@(x:xs) i = kthHelper' list i 1 
 
 kthHelper' :: [a] -> Int -> Int -> a
 kthHelper' (x:xs) i j
@@ -249,20 +247,48 @@ enumerateLengths ((i, x):xs) m =
 
 -- Problem 31
 -- Determine whether a given number is prime.
-isPrime :: (Integral a) => a -> Bool
-isPrime 1 = False
-isPrime 2 = True
-isPrime n = primeChecker $ truncate . sqrt $ n
-  where
-    primeChecker n
+isPrime :: Integral a => a -> Bool
+isPrime n = all (/= 0) $ map (mod n) [2..truncate $ sqrt $ fromIntegral n]
 
 -- Problem 32
+-- Determine the greatest common divisor of two positive integers
+myGCD :: Integral a => a -> a -> a
+myGCD a b 
+  | b == 0 = a
+  | otherwise = myGCD b (a `mod` b)
 
 -- Problem 33
+-- Determine whether two positive integers are coprime. Two numbers are coprime
+-- if their greatest common divisor equals 1.
+coprime :: Integral a => a -> a -> Bool
+coprime a b 
+  | myGCD a b == 1 = True
+  | otherwise = False
 
 -- Problem 34
+-- Calculate Euler's totient function phi(m)
+-- Euler's so-called totient function phi(m) is defined as the number of
+-- positive intgers r (1 <= r < m) that are coprime to m. 
+-- Example: m = 10: r = 1,3,7,9; thus phi(m) = 4.
+-- phi(1) = 1
+totient :: Integral a => a -> Int
+totient m = length $ filter (coprime m) [1..m]
 
 -- Problem 35
+-- Determine the prime factors of a given positive integer. Construct a flat
+-- list containing the prime factors in ascending order.
+primeFactors :: Integral a => a -> [a]
+primeFactors n =
+  let primes = filter isPrime [2..n] in
+  primeIter n primes [] 
+
+primeIter :: Integral a => a -> [a] -> [a] -> [a]
+primeIter n _ factors
+  | n == 1 = reverse factors
+primeIter n primes@(p:ps) factors =
+  if n `mod` p == 0
+  then primeIter (n `quot` p) primes (p:factors)
+  else primeIter n ps factors
 
 -- Problem 36
 
@@ -391,4 +417,3 @@ isPrime n = primeChecker $ truncate . sqrt $ n
 -- Problem 98
 
 -- Problem 99
-
